@@ -14,5 +14,17 @@
       <li>Pulumi</li>
     </ul>
   </section>
+  <button id="clickMeButton">Click Me!</button>
 </main>
+{{ end }}
+
+{{define "js"}}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("clickMeButton");
+    button.addEventListener("click", function () {
+      alert("Thanks for clicking the button!");
+    });
+  });
+</script>
 {{ end }}
