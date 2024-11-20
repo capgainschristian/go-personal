@@ -1,9 +1,10 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/capgainschristian/go-personal/internal/pkg/render"
 )
 
 func main() {
@@ -11,10 +12,7 @@ func main() {
 	// Load and cache templates
 
 	// Load routes
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	templates := template.Must(template.ParseGlob("templates/*.tmpl"))
+	render.RenderPages()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		err := templates.ExecuteTemplate(w, "home.page.tmpl", nil)
