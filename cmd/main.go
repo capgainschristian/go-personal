@@ -4,18 +4,17 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
 )
 
 func main() {
+
+	// Load and cache templates
+
+	// Load routes
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	templates := template.Must(template.ParseFiles(
-		filepath.Join("templates", "base.layout.tmpl"),
-		filepath.Join("templates", "home.page.tmpl"),
-		filepath.Join("templates", "about.page.tmpl"),
-	))
+	templates := template.Must(template.ParseGlob("templates/*.tmpl"))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		err := templates.ExecuteTemplate(w, "home.page.tmpl", nil)
