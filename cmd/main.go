@@ -14,10 +14,19 @@ func main() {
 	templates := template.Must(template.ParseFiles(
 		filepath.Join("templates", "base.layout.tmpl"),
 		filepath.Join("templates", "home.page.tmpl"),
+		filepath.Join("templates", "about.page.tmpl"),
 	))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		err := templates.ExecuteTemplate(w, "home.page.tmpl", nil)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			log.Println(err)
+		}
+	})
+
+	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		err := templates.ExecuteTemplate(w, "about.page.tmpl", nil)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			log.Println(err)
