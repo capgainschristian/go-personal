@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -10,7 +13,10 @@ var templates *template.Template
 
 func main() {
 
-	initialize()
+	templates = parseTemplate()
+
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	router := SetupRouter()
 
@@ -21,13 +27,24 @@ func main() {
 	}
 }
 
-func initialize() {
-	templates = template.Must(template.ParseGlob("templates/*.tmpl"))
+func parseTemplate() *template.Template {
+	template := template.New("")
+	err := filepath.Walk("./templates", func(path string, info os.FileInfo, err error) error {
+		log.Println("Processing file:", path)
+		if strings.Contains(path, ".tmpl") {
+			_, err := template.ParseFiles(path)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return err
+	})
+	if err != nil {
+		panic(err)
+	}
 
-	for _, tmpl := range templates.Templates() {
-        log.Println("Loaded template:", tmpl.Name())
-    }
-	
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	for _, tmpl := range template.Templates() {
+		log.Println("Loaded template:", tmpl.Name())
+	}
+	return template
 }
