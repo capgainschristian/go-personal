@@ -3,36 +3,31 @@ package main
 import (
 	"log"
 	"net/http"
-
-	"github.com/capgainschristian/go-personal/internal/pkg/render"
+	"text/template"
 )
+
+var templates *template.Template
 
 func main() {
 
-	// Load and cache templates
+	initialize()
 
-	// Load routes
-	render.RenderPages()
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err := templates.ExecuteTemplate(w, "home.page.tmpl", nil)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			log.Println(err)
-		}
-	})
-
-	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
-		err := templates.ExecuteTemplate(w, "about.page.tmpl", nil)
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			log.Println(err)
-		}
-	})
+	router := SetupRouter()
 
 	log.Println("Starting server on :8080..")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func initialize() {
+	templates = template.Must(template.ParseGlob("templates/*.tmpl"))
+
+	for _, tmpl := range templates.Templates() {
+        log.Println("Loaded template:", tmpl.Name())
+    }
+	
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 }
