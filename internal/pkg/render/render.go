@@ -1,15 +1,15 @@
 package render
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 )
 
-func RenderPages() *template.Template {
-	fs := http.FileServer(http.Dir("./static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
-
-	templates := template.Must(template.ParseGlob("templates/*.tmpl"))
-	
-	return templates
+func RenderPages(w http.ResponseWriter, tmpl string) {
+	parsedTemplate, _ := template.ParseFiles("./templates/" + tmpl, "./templates/base.layout.tmpl")
+	err := parsedTemplate.Execute(w, nil)
+	if err != nil {
+		fmt.Println("Error parsing template:", err)
+	}
 }

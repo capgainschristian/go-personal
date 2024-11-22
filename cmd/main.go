@@ -1,19 +1,19 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
-	"text/template"
 )
 
 var templates *template.Template
 
 func main() {
 
-	templates = parseTemplate()
+	templates = parseTemplates()
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -27,24 +27,36 @@ func main() {
 	}
 }
 
-func parseTemplate() *template.Template {
-	template := template.New("")
+func parseTemplates() *template.Template {
+	root := template.New("root") // Explicitly name the root template
 	err := filepath.Walk("./templates", func(path string, info os.FileInfo, err error) error {
-		log.Println("Processing file:", path)
-		if strings.Contains(path, ".tmpl") {
-			_, err := template.ParseFiles(path)
-			if err != nil {
-				log.Println(err)
-			}
+		if err != nil {
+			return err // Handle any walking error
 		}
-		return err
+
+		// Only process files with .tmpl extension
+		if !info.IsDir() && strings.HasSuffix(path, ".tmpl") {
+			log.Println("Processing file:", path)
+
+			// ParseFiles returns the updated template; assign it back to root
+			updatedRoot, parseErr := root.ParseFiles(path)
+			if parseErr != nil {
+				log.Printf("Error parsing file %s: %v", path, parseErr)
+				return parseErr
+			}
+			root = updatedRoot // Update the root with the new template
+		}
+		return nil
 	})
+
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error walking the templates directory: %v", err)
 	}
 
-	for _, tmpl := range template.Templates() {
+	// Log all loaded templates
+	for _, tmpl := range root.Templates() {
 		log.Println("Loaded template:", tmpl.Name())
 	}
-	return template
+
+	return root
 }
