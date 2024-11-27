@@ -36,7 +36,6 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
-	log.Println("Creating template cache..")
 	myCache := map[string]*template.Template{}
 
 	//page.tmpl files have to be rendered first before layout.tmpl files.
