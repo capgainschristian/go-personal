@@ -11,33 +11,32 @@ import (
 var TemplateCache map[string]*template.Template
 
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	//create a template cache
-	tc, err := CreateTemplateCache()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	//get requested template from cache
-	t, ok := tc[tmpl]
+	// Retrieve the requested template from the cache
+	t, ok := TemplateCache[tmpl]
 	if !ok {
-		log.Fatal(err)
+		log.Printf("Template %s not found in cache", tmpl)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
-	// use buf to get better error checking
+	// Use buf to ensure atomic writes and better error checking
 	buf := new(bytes.Buffer)
-	err = t.Execute(buf, nil)
+	err := t.Execute(buf, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error rendering template:", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
 	}
 
-	//render the template
+	// Write the rendered template to the response writer
 	_, err = buf.WriteTo(w)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error writing to response:", err)
 	}
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
+	log.Println("Creating template cache..")
 	myCache := map[string]*template.Template{}
 
 	//page.tmpl files have to be rendered first before layout.tmpl files.
