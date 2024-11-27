@@ -8,9 +8,11 @@ import (
 	"path/filepath"
 )
 
+var TemplateCache map[string]*template.Template
+
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	//create a template cache
-	tc, err := createTemplateCache()
+	tc, err := CreateTemplateCache()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +37,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	}
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	//page.tmpl files have to be rendered first before layout.tmpl files.
