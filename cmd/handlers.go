@@ -9,10 +9,10 @@ import (
 
 func Home(w http.ResponseWriter, r *http.Request) {
 	log.Println("home page")
-	render.RenderPages(w, "home.page.tmpl")
+	render.RenderTemplate(w, "home.page.tmpl")
 }
 
 func About(w http.ResponseWriter, r *http.Request) {
 	log.Println("about page")
-	render.RenderPages(w, "about.page.tmpl")
+	render.RenderTemplate(w, "about.page.tmpl")
 }
